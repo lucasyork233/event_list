@@ -3,48 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>枢要事象定序法典</title>
+    <title>Daily Event List</title>
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>枢要事象定序法典</h1>
-            <p>从旧到新 + DIY 排序</p>
+            <h1>Daily Event List</h1>
+            <p>from old to new + DIY sort</p>
             <div class="header-buttons">
                 <button id="addEventBtn" class="add-btn">+</button>
-                <button id="clearAllBtn" class="clear-btn" title="清空所有事件">清空</button>
+                <button id="clearAllBtn" class="clear-btn" title="clear all events">Clear</button>
             </div>
         </header>
 
         <div class="events-list">
             <div id="eventsContainer">
-                <!-- 事件将动态加载到这里 -->
+                <!-- Events will be dynamically loaded here -->
             </div>
         </div>
     </div>
 
-    <!-- 弹窗 -->
+    <!-- Modal -->
     <div id="modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 id="modalTitle">添加新事件</h2>
+                <h2 id="modalTitle">Add new enent</h2>
                 <span class="close">&times;</span>
             </div>
             <form id="eventForm">
                 <input type="hidden" id="eventId">
                 <div class="form-group">
-                    <label for="eventName">事件名称 *</label>
+                    <label for="eventName">Event name *</label>
                     <input type="text" id="eventName" required>
                 </div>
                 <div class="form-group">
-                    <label for="eventNote">备注</label>
+                    <label for="eventNote">Note</label>
                     <textarea id="eventNote" rows="3"></textarea>
                 </div>
                 <div class="form-actions">
-                    <button type="button" class="cancel-btn">取消</button>
-                    <button type="submit" class="submit-btn" id="submitBtn">添加事件</button>
+                    <button type="button" class="cancel-btn">Cancel</button>
+                    <button type="submit" class="submit-btn" id="submitBtn">Add event</button>
                 </div>
             </form>
         </div>

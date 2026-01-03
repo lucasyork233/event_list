@@ -1,11 +1,11 @@
-// DOM元素
+// DOM Elements
 const eventForm = document.getElementById('eventForm');
 const eventNameInput = document.getElementById('eventName');
 const eventNoteInput = document.getElementById('eventNote');
 const eventIdInput = document.getElementById('eventId');
 const eventsContainer = document.getElementById('eventsContainer');
 
-// 弹窗相关元素
+// Modal related elements
 const modal = document.getElementById('modal');
 const addEventBtn = document.getElementById('addEventBtn');
 const clearAllBtn = document.getElementById('clearAllBtn');
@@ -14,27 +14,27 @@ const cancelBtn = document.querySelector('.cancel-btn');
 const modalTitle = document.getElementById('modalTitle');
 const submitBtn = document.getElementById('submitBtn');
 
-// 事件数据存储
+// Event data storage
 let events = [];
 
-// 初始化
+// Initialization
 document.addEventListener('DOMContentLoaded', () => {
-    // 从本地存储加载事件
+    // Load events from local storage
     loadEventsFromStorage();
-    // 渲染事件列表
+    // Render event list
     renderEvents();
 
-    // 添加事件按钮点击事件
+    // Add event button click event
     addEventBtn.addEventListener('click', openModal);
 
-    // 清空所有事件按钮点击事件
+    // Clear all events button click event
     clearAllBtn.addEventListener('click', clearAllEvents);
 
-    // 关闭弹窗事件
+    // Close modal events
     closeBtn.addEventListener('click', closeModal);
     cancelBtn.addEventListener('click', closeModal);
 
-    // 点击弹窗外部关闭弹窗
+    // Click outside modal to close
     window.addEventListener('click', (e) => {
         if (e.target === modal) {
             closeModal();
@@ -42,121 +42,121 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// 打开弹窗
+// Open modal
 function openModal(eventId = null) {
     modal.style.display = 'block';
 
-    // 清空表单
+    // Clear form
     eventForm.reset();
 
     if (eventId) {
-        // 编辑模式
+        // Edit mode
         const event = events.find(e => e.id === eventId);
         if (event) {
-            modalTitle.textContent = '编辑事件';
-            submitBtn.textContent = '保存修改';
+            modalTitle.textContent = 'Edit Event';
+            submitBtn.textContent = 'Save Changes';
             eventIdInput.value = event.id;
             eventNameInput.value = event.name;
             eventNoteInput.value = event.note || '';
         }
     } else {
-        // 添加模式
-        modalTitle.textContent = '添加新事件';
-        submitBtn.textContent = '添加事件';
+        // Add mode
+        modalTitle.textContent = 'Add New Event';
+        submitBtn.textContent = 'Add Event';
         eventIdInput.value = '';
     }
 }
 
-// 关闭弹窗
+// Close modal
 function closeModal() {
     modal.style.display = 'none';
 }
 
-// 编辑事件
+// Edit event
 function editEvent(id) {
     openModal(id);
 }
 
-// 表单提交处理
+// Form submit handler
 eventForm.addEventListener('submit', (e) => {
     e.preventDefault();
 
-    // 获取表单数据
+    // Get form data
     const name = eventNameInput.value.trim();
     const note = eventNoteInput.value.trim();
     const eventId = eventIdInput.value;
 
-    // 验证必填字段
+    // Validate required fields
     if (!name) {
-        alert('请输入事件名称');
+        alert('Please enter event name');
         return;
     }
 
     if (eventId) {
-        // 编辑现有事件
+        // Edit existing event
         const eventIndex = events.findIndex(e => e.id === parseInt(eventId));
         if (eventIndex !== -1) {
             events[eventIndex].name = name;
             events[eventIndex].note = note;
         }
     } else {
-        // 创建新事件
-        // 对于新事件，sort_order 设置为当前事件数量，这样新事件会自动排在最后
+        // Create new event
+        // For new events, set sort_order to current event count, so new events are placed at the end
         const newEvent = {
-            id: Date.now(), // 使用时间戳作为唯一ID
+            id: Date.now(), // Use timestamp as unique ID
             name: name,
             note: note,
-            create_time: new Date().toISOString(), // ISO格式的时间戳
-            add_time: '', // 占位字段，暂不使用
-            sort_order: events.length, // 使用当前数量作为排序值，新事件排在最后
-            completed: false // 初始状态为未完成
+            create_time: new Date().toISOString(), // ISO format timestamp
+            add_time: '', // Placeholder field, not currently used
+            sort_order: events.length, // Use current count as sort value, new events at the end
+            completed: false // Initial state is not completed
         };
 
-        // 添加到事件数组
+        // Add to events array
         events.push(newEvent);
     }
 
-    // 保存到本地存储
+    // Save to local storage
     saveEventsToStorage();
 
-    // 重新渲染事件列表
+    // Re-render event list
     renderEvents();
 
-    // 关闭弹窗
+    // Close modal
     closeModal();
 });
 
-// 渲染事件列表
+// Render event list
 function renderEvents() {
-    // 清空容器
+    // Clear container
     eventsContainer.innerHTML = '';
 
-    // 按排序字段排序，如果没有则按创建时间排序
-    // 顺序：从上到下查看，旧事件在顶部，新增事件在底部（从旧到新）
+    // Sort by sort field, if not available, sort by creation time
+    // Order: from top to bottom, old events at top, new events at bottom (from old to new)
     const sortedEvents = [...events].sort((a, b) => {
-        // 先按sort_order排序（如果有拖拽操作）
+        // First sort by sort_order (if drag operation exists)
         if (a.sort_order !== undefined && b.sort_order !== undefined &&
             typeof a.sort_order === 'number' && typeof b.sort_order === 'number') {
             return a.sort_order - b.sort_order;
         }
-        // 如果没有拖拽操作，按创建时间从旧到新排序（旧事件在前）
+        // If no drag operation, sort by creation time from old to new (old events first)
         return new Date(a.create_time) - new Date(b.create_time);
     });
 
-    // 如果没有事件，显示空状态
+    // If no events, show empty state
     if (sortedEvents.length === 0) {
-        eventsContainer.innerHTML = '<div class="empty-state">暂无事件，请添加新事件</div>';
+        eventsContainer.innerHTML = '<div class="empty-state">No events, please add new event</div>';
         return;
     }
 
-    // 渲染每个事件
+    // Render each event
     sortedEvents.forEach((event, index) => {
         const eventElement = createEventElement(event, index + 1);
         eventsContainer.appendChild(eventElement);
     });
 }
 
-// 创建事件元素
+// Create event element
 function createEventElement(event, rank) {
     const eventDiv = document.createElement('div');
     eventDiv.className = 'event-item';
@@ -166,11 +166,11 @@ function createEventElement(event, rank) {
     eventDiv.dataset.id = event.id;
     eventDiv.draggable = true;
 
-    // 格式化日期
+    // Format date
     const createDate = new Date(event.create_time);
     const formattedDate = `${createDate.getFullYear()}-${(createDate.getMonth() + 1).toString().padStart(2, '0')}-${createDate.getDate().toString().padStart(2, '0')}`;
 
-    // 构建HTML
+    // Build HTML
     eventDiv.innerHTML = `
         <div class="event-number">${rank}</div>
         <div class="drag-handle">⋮⋮</div>
@@ -179,25 +179,25 @@ function createEventElement(event, rank) {
             <button class="delete-btn" data-id="${event.id}">×</button>
         </div>
         <div class="event-header">
-            <div class="event-name" title="双击切换完成状态">${escapeHtml(event.name)}</div>
+            <div class="event-name" title="Double-click to toggle completion status">${escapeHtml(event.name)}</div>
             <div class="event-date">${formattedDate}</div>
         </div>
         ${event.note ? `<div class="event-note">${escapeHtml(event.note)}</div>` : ''}
     `;
 
-    // 添加编辑按钮事件
+    // Add edit button event
     const editBtn = eventDiv.querySelector('.edit-btn');
     editBtn.addEventListener('click', () => editEvent(event.id));
 
-    // 添加删除按钮事件
+    // Add delete button event
     const deleteBtn = eventDiv.querySelector('.delete-btn');
     deleteBtn.addEventListener('click', () => deleteEvent(event.id));
 
-    // 添加双击事件（切换完成状态）
+    // Add double-click event (toggle completion status)
     const eventName = eventDiv.querySelector('.event-name');
     eventName.addEventListener('dblclick', () => toggleComplete(event.id));
 
-    // 添加拖拽事件
+    // Add drag events
     eventDiv.addEventListener('dragstart', handleDragStart);
     eventDiv.addEventListener('dragend', handleDragEnd);
     eventDiv.addEventListener('dragover', handleDragOver);
@@ -208,25 +208,25 @@ function createEventElement(event, rank) {
     return eventDiv;
 }
 
-// 切换事件完成状态
+// Toggle event completion status
 function toggleComplete(id) {
     const event = events.find(e => e.id === id);
     if (event) {
-        // 切换完成状态
+        // Toggle completion status
         event.completed = !event.completed;
 
-        // 保存到本地存储
+        // Save to local storage
         saveEventsToStorage();
 
-        // 重新渲染事件列表
+        // Re-render event list
         renderEvents();
     }
 }
 
-// 拖拽相关变量
+// Drag related variables
 let draggedElement = null;
 
-// 拖拽开始
+// Drag start
 function handleDragStart(e) {
     draggedElement = this;
     this.classList.add('dragging');
@@ -234,18 +234,18 @@ function handleDragStart(e) {
     e.dataTransfer.setData('text/html', this.innerHTML);
 }
 
-// 拖拽结束
+// Drag end
 function handleDragEnd(e) {
     this.classList.remove('dragging');
 
-    // 清除所有拖拽相关的样式
+    // Clear all drag-related styles
     const allItems = document.querySelectorAll('.event-item');
     allItems.forEach(item => {
         item.classList.remove('drag-over');
     });
 }
 
-// 拖拽经过
+// Drag over
 function handleDragOver(e) {
     if (e.preventDefault) {
         e.preventDefault();
@@ -254,62 +254,62 @@ function handleDragOver(e) {
     return false;
 }
 
-// 拖拽进入
+// Drag enter
 function handleDragEnter(e) {
     if (draggedElement !== this) {
         this.classList.add('drag-over');
     }
 }
 
-// 拖拽离开
+// Drag leave
 function handleDragLeave(e) {
     this.classList.remove('drag-over');
 }
 
-// 拖拽放置
+// Drag drop
 function handleDrop(e) {
     if (e.stopPropagation) {
         e.stopPropagation();
     }
 
     if (draggedElement !== this) {
-        // 获取两个元素的ID
+        // Get the IDs of the two elements
         const draggedId = parseInt(draggedElement.dataset.id);
         const targetId = parseInt(this.dataset.id);
 
-        // 重新排序事件
+        // Reorder events
         reorderEvents(draggedId, targetId);
     }
 
     return false;
 }
 
-// 重新排序事件
+// Reorder events
 function reorderEvents(draggedId, targetId) {
-    // 按当前排序获取事件列表
-    // 顺序：从上到下查看，旧事件在顶部，新增事件在底部（从旧到新）
+    // Get event list by current sort order
+    // Order: from top to bottom, old events at top, new events at bottom (from old to new)
     const sortedEvents = [...events].sort((a, b) => {
-        // 先按sort_order排序（如果有拖拽操作）
+        // First sort by sort_order (if drag operation exists)
         if (a.sort_order !== undefined && b.sort_order !== undefined &&
             typeof a.sort_order === 'number' && typeof b.sort_order === 'number') {
             return a.sort_order - b.sort_order;
         }
-        // 如果没有拖拽操作，按创建时间从旧到新排序（旧事件在前）
+        // If no drag operation, sort by creation time from old to new (old events first)
         return new Date(a.create_time) - new Date(b.create_time);
     });
 
-    // 找到拖拽元素和目标元素的索引
+    // Find the index of dragged element and target element
     const draggedIndex = sortedEvents.findIndex(event => event.id === draggedId);
     const targetIndex = sortedEvents.findIndex(event => event.id === targetId);
 
     if (draggedIndex !== -1 && targetIndex !== -1) {
-        // 移动元素
+        // Move element
         const [draggedEvent] = sortedEvents.splice(draggedIndex, 1);
         sortedEvents.splice(targetIndex, 0, draggedEvent);
 
-        // 重新分配排序值
-        // 将所有事件的 sort_order 更新为它们在列表中的位置索引（0, 1, 2, 3...）
-        // 这样确保了拖动后的顺序会被保存，并且在重新加载后保持
+        // Reassign sort values
+        // Update all events' sort_order to their position index in the list (0, 1, 2, 3...)
+        // This ensures the dragged order is saved and maintained after reload
         sortedEvents.forEach((event, index) => {
             const originalEvent = events.find(e => e.id === event.id);
             if (originalEvent) {
@@ -317,22 +317,22 @@ function reorderEvents(draggedId, targetId) {
             }
         });
 
-        // 保存到本地存储
+        // Save to local storage
         saveEventsToStorage();
 
-        // 重新渲染事件列表
+        // Re-render event list
         renderEvents();
     }
 }
 
-// 删除事件
+// Delete event
 function deleteEvent(id) {
-    if (confirm('确定要删除此事件吗？')) {
-        // 从数组中移除事件
+    if (confirm('Are you sure you want to delete this event?')) {
+    // Remove event from array
         events = events.filter(event => event.id !== id);
 
-        // 重新分配 sort_order，确保连续性
-        // 按当前顺序排序后，重新分配索引（0, 1, 2, 3...）
+    // Reassign sort_order to ensure continuity
+    // Sort by current order, then reassign indices (0, 1, 2, 3...)
         const sortedEvents = [...events].sort((a, b) => {
             if (a.sort_order !== undefined && b.sort_order !== undefined &&
                 typeof a.sort_order === 'number' && typeof b.sort_order === 'number') {
@@ -341,7 +341,7 @@ function deleteEvent(id) {
             return new Date(a.create_time) - new Date(b.create_time);
         });
 
-        // 更新每个事件的 sort_order
+        // Update each event's sort_order
         sortedEvents.forEach((event, index) => {
             const originalEvent = events.find(e => e.id === event.id);
             if (originalEvent) {
@@ -349,70 +349,70 @@ function deleteEvent(id) {
             }
         });
 
-        // 保存到本地存储
+        // Save to local storage
         saveEventsToStorage();
 
-        // 重新渲染事件列表
+        // Re-render event list
         renderEvents();
     }
 }
 
-// 清空所有事件
+// Clear all events
 function clearAllEvents() {
-    // 如果没有事件，提示用户
+    // If no events, prompt user
     if (events.length === 0) {
-        alert('当前没有事件可以清空');
+        alert('No events to clear');
         return;
     }
 
-    // 显示二次确认对话框
-    const confirmClear = confirm(`确定要清空所有 ${events.length} 个事件吗？\n\n此操作不可恢复！`);
+    // Show second confirmation dialog
+    const confirmClear = confirm(`Are you sure you want to clear all ${events.length} events?\n\nThis action cannot be undone!`);
 
     if (confirmClear) {
-        // 再次确认，防止误操作
-        const finalConfirm = confirm('请再次确认：真的要清空所有事件吗？');
+        // Confirm again to prevent mistakes
+        const finalConfirm = confirm('Please confirm again: Are you sure you want to clear all events?');
 
         if (finalConfirm) {
-            // 清空事件数组
+            // Clear events array
             events = [];
 
-            // 清空本地存储
+            // Clear local storage
             localStorage.removeItem('thingListEvents');
 
-            // 重新渲染事件列表（显示空状态）
+            // Re-render event list (show empty state)
             renderEvents();
 
-            // 提示用户
-            alert('所有事件已清空');
+            // Prompt user
+            alert('All events have been cleared');
         }
     }
 }
 
-// HTML转义，防止XSS
+// HTML escape, prevent XSS
 function escapeHtml(text) {
     const map = {
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
+        '&': '&',
+        '<': '<',
+        '>': '>',
+        '"': '"',
         "'": '&#039;'
     };
 
     return text.replace(/[&<>"']/g, m => map[m]);
 }
 
-// 保存事件到本地存储
+// Save events to local storage
 function saveEventsToStorage() {
     localStorage.setItem('thingListEvents', JSON.stringify(events));
 }
 
-// 从本地存储加载事件
+// Load events from local storage
 function loadEventsFromStorage() {
     const storedEvents = localStorage.getItem('thingListEvents');
     if (storedEvents) {
         try {
             events = JSON.parse(storedEvents);
-            // 为旧数据添加排序字段和完成状态字段
+            // Add sort and completion status fields to old data
             events.forEach((event, index) => {
                 if (event.sort_order === undefined) {
                     event.sort_order = index;
@@ -422,7 +422,7 @@ function loadEventsFromStorage() {
                 }
             });
         } catch (e) {
-            console.error('解析存储的事件失败:', e);
+            console.error('Failed to parse stored events:', e);
             events = [];
         }
     }
